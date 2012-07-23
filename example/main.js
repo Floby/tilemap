@@ -22,8 +22,6 @@ function insertItem (item, pt) {
     itemSet.toFront();
 }
 
-var tiles = {};
-
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
         (function (x, y) {
@@ -35,8 +33,6 @@ for (var x = -10; x < 10; x++) {
             tile.attr('fill', 'rgba(210,210,210,1.0)');
             tile.attr('stroke-width', '1');
             tile.attr('stroke', 'rgb(255,255,200)');
-            
-            tiles[x + ',' + y] = tile;
         })(x, y);
     }
 }
@@ -76,7 +72,7 @@ window.addEventListener('mousemove', function (ev) {
     var x = Math.round(xy[0] + grid.position[0]);
     var y = Math.round(xy[1] + grid.position[1]);
     
-    var tile = tiles[x + ',' + y];
+    var tile = grid.tileAt(x, y);
     if (tile === selected) return;
     
     if (selected) {
