@@ -6,6 +6,7 @@ var images = [ 'rack_0.png' ].reduce(function (acc, file) {
     im.src = file;
     return acc;
 }, {});
+
 var items = [];
 function insertItem (item, pt) {
     var rec = { item : item, pt : pt };
@@ -20,19 +21,43 @@ function insertItem (item, pt) {
     items.forEach(function (it) {
         it.item.toFront();
     });
+    
+    tiles.forEach(function (t) {
+        t.tile.toFront();
+    });
+}
+
+var tiles = [];
+function insertTile (tile, pt) {
+    var rec = { tile : tile, pt : pt };
+    for (var i = 0; i < tiles.length; i++) {
+        if (pt[1] < tiles[i].pt[1]) {
+            tiles.splice(i, 0, rec);
+            break;
+        }
+    }
+    if (i === tiles.length) tiles.push(rec);
+    
+    tiles.forEach(function (t) {
+        t.tile.toFront();
+    });
 }
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
         (function (x, y) {
-            var t = grid.createTile(x, y);
-            t.attr('fill', 'rgb(210,210,210)');
-            t.attr('stroke-width', '1');
-            t.attr('stroke', 'rgb(255,255,200)');
+            var under = grid.createTile(x, y);
+            under.attr('fill', 'rgb(210,210,210)');
+            under.attr('stroke-width', '1');
+            under.attr('stroke', 'rgb(255,255,200)');
             
             var pt = grid.toWorld(x, y);
             
-            t.click(function () {
+            var over = grid.createTile(x, y);
+            over.attr('stroke', 'transparent');
+            insertTile(over, pt);
+            
+            over.click(function () {
                 var im = images['rack_0.png'];
                 var item = grid.paper.image(
                     im.src,
@@ -42,11 +67,11 @@ for (var x = -10; x < 10; x++) {
                 insertItem(item, pt);
             });
             
-            t.mouseover(function () {
-                t.attr('fill', 'rgb(255,225,210)');
+            over.mouseover(function () {
+                over.attr('fill', 'rgba(255,127,127,0.8)');
             });
-            t.mouseout(function () {
-                t.attr('fill', 'rgb(210,210,210)');
+            over.mouseout(function () {
+                over.attr('fill', 'transparent');
             });
         })(x, y);
     }
@@ -59,6 +84,7 @@ window.addEventListener('keydown', function (ev) {
         189 : 0.9,
     }[ev.keyCode];
     if (dz) return grid.zoom(grid.zoomLevel * dz);
+    if (ev.keyCode === 49) return grid.zoom(1);
     
     var dxy = {
         down : [ 0, -1 ],
