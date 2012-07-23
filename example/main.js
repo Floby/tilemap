@@ -3,16 +3,10 @@ grid.appendTo(document.body);
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
-        (function (x, y) {
-            var tile = grid.createTile(x, y);
-            tile.data('x', x);
-            tile.data('y', y);
-            tile.data('pt', grid.toWorld(x, y));
-            
-            tile.attr('fill', 'rgba(210,210,210,1.0)');
-            tile.attr('stroke-width', '1');
-            tile.attr('stroke', 'rgb(255,255,200)');
-        })(x, y);
+        var tile = grid.createTile(x, y);
+        tile.attr('fill', 'rgba(210,210,210,1.0)');
+        tile.attr('stroke-width', '1');
+        tile.attr('stroke', 'rgb(255,255,200)');
     }
 }
 

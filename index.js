@@ -48,6 +48,8 @@ TileMap.prototype.createTile = function (x, y) {
     ].map(function (pt) { return self.toWorld(pt[0], pt[1]) });
     
     var tile = this.paper.path(polygon(points));
+    tile.data('x', x);
+    tile.data('y', y);
     this.tiles[x + ',' + y] = tile;
     return tile;
 };
