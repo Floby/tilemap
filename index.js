@@ -8,14 +8,15 @@ function TileMap (width, height) {
     this.element = document.createElement('div');
     this.paper = raphael(this.element, width, height);
     this.size = [ width, height ];
-    this.position = [ 0, 0 ];
-    this.tiles = this.paper.set();
+    this.zoomLevel = 1;
+    
+    this.moveTo(0, 0);
 }
 
 TileMap.prototype.resize = function (width, height) {
     this.size = [ width, height ];
-    this.paper.setSize(width, height);
-}
+    this._setView();
+};
 
 TileMap.prototype.createTile = function (x, y) {
     var self = this;
@@ -27,11 +28,9 @@ TileMap.prototype.createTile = function (x, y) {
     ].map(function (pt) { return self.toWorld(pt[0], pt[1]) });
     
     var tile = this.paper.path(polygon(points));
-    tile.transform('t' + self.position[0] + ',' + self.position[1]);
     tile.attr('stroke-width', '1');
     tile.attr('fill', 'rgba(0,0,127,0.5)');
     tile.attr('stroke', 'rgba(0,0,64,0.5)');
-    self.tiles.push(tile);
     
     return tile;
 }
@@ -42,7 +41,33 @@ TileMap.prototype.move = function (x, y) {
 
 TileMap.prototype.moveTo = function (x, y) {
     this.position = [ x, y ];
-    this.tiles.transform('t' + x + ',' + y);
+    this._setView();
+};
+
+TileMap.prototype.pan = function (x, y) {
+    var tx = x / 2 + y / 2;
+    var ty = x / 2 - y / 2;
+    
+    this.move(
+        tx / Math.pow(this.zoomLevel, 0.5),
+        ty / Math.pow(this.zoomLevel, 0.5)
+    );
+};
+
+TileMap.prototype.zoom = function (level) {
+    this.zoomLevel = level;
+    this._setView();
+};
+
+TileMap.prototype._setView = function () {
+    var w = this.size[0] / this.zoomLevel;
+    var h = this.size[1] / this.zoomLevel;
+    
+    var pt = this.toWorld(this.position[0], this.position[1]);
+    var x = pt[0] - w / 2;
+    var y = pt[1] - h / 2;
+    
+    this.paper.setViewBox(x, y, w, h);
 };
 
 TileMap.prototype.toWorld = function (x, y) {
