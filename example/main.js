@@ -7,21 +7,6 @@ var images = [ 'rack_0.png' ].reduce(function (acc, file) {
     return acc;
 }, {});
 
-var itemSet = grid.paper.set();
-function insertItem (item, pt) {
-    item.data('pt', pt);
-    
-    for (var i = 0; i < itemSet.length; i++) {
-        if (pt[1] < itemSet[i].data('pt')[1]) {
-            itemSet.splice(i, 0, item);
-            break;
-        }
-    }
-    if (i === itemSet.length) itemSet.push(item);
-    
-    itemSet.toFront();
-}
-
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
         (function (x, y) {
@@ -89,13 +74,5 @@ window.addEventListener('mousemove', function (ev) {
 
 window.addEventListener('mousedown', function (ev) {
     if (!selected) return;
-    var pt = selected.data('pt');
-    
-    var im = images['rack_0.png'];
-    var item = grid.paper.image(
-        im.src,
-        pt[0] - im.width / 2, pt[1] - im.height + 25,
-        im.width, im.height
-    );
-    insertItem(item, pt);
+    grid.createItem('rack_0.png', selected.data('x'), selected.data('y'));
 });

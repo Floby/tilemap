@@ -9,7 +9,10 @@ function TileMap (width, height) {
     this.paper = raphael(this.element, width, height);
     this.size = [ width, height ];
     this.zoomLevel = 1;
+    
     this.tiles = {};
+    this.items = this.paper.set();
+    this.images = {};
     
     this.moveTo(0, 0);
 }
@@ -36,6 +39,33 @@ TileMap.prototype.createTile = function (x, y) {
 
 TileMap.prototype.tileAt = function (x, y) {
     return this.tiles[x + ',' + y];
+};
+
+TileMap.prototype.createItem = function (src, x, y) {
+    var self = this;
+    var im = new Image;
+    var w = self.toWorld(x, y);
+    
+    im.addEventListener('load', function () {
+        var item = self.paper.image(
+            src,
+            w[0] - im.width / 2, w[1] - im.height + 25,
+            im.width, im.height
+        );
+        item.data('x', x);
+        item.data('y', y);
+        
+        for (var i = 0; i < self.items.length; i++) {
+            if (y < self.items[i].data('y')) {
+                self.items.splice(i, 0, item);
+                break;
+            }
+        }
+        if (i === self.items.length) self.items.push(item);
+        
+        self.items.toFront();
+    });
+    im.src = src;
 };
 
 TileMap.prototype.move = function (x, y) {
