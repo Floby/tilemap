@@ -76,12 +76,14 @@ window.addEventListener('mousemove', function (ev) {
     var x = Math.round(xy[0] + grid.position[0]);
     var y = Math.round(xy[1] + grid.position[1]);
     
+    var tile = tiles[x + ',' + y];
+    if (tile === selected) return;
+    
     if (selected) {
         selected.toBack();
         selected.attr('fill', 'rgba(210,210,210,1.0)');
     }
     
-    var tile = tiles[x + ',' + y];
     if (tile) {
         selected = tile;
         selected.toFront();
