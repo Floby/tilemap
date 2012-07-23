@@ -22,7 +22,7 @@ function insertItem (item, pt) {
     itemSet.toFront();
 }
 
-var tileSet = grid.paper.set();
+var tiles = {};
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
@@ -36,7 +36,7 @@ for (var x = -10; x < 10; x++) {
             tile.attr('stroke-width', '1');
             tile.attr('stroke', 'rgb(255,255,200)');
             
-            tileSet.push(tile);
+            tiles[x + ',' + y] = tile;
         })(x, y);
     }
 }
@@ -81,15 +81,11 @@ window.addEventListener('mousemove', function (ev) {
         selected.attr('fill', 'rgba(210,210,210,1.0)');
     }
     
-    for (var i = 0; i < tileSet.length; i++) {
-        var px = tileSet[i].data('x');
-        var py = tileSet[i].data('y');
-        if (px === x && py === y) {
-            selected = tileSet[i];
-            selected.toFront();
-            selected.attr('fill', 'rgba(255,127,127,0.8)');
-            return;
-        }
+    var tile = tiles[x + ',' + y];
+    if (tile) {
+        selected = tile;
+        selected.toFront();
+        selected.attr('fill', 'rgba(255,127,127,0.8)');
     }
 });
 
