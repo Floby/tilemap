@@ -1,10 +1,14 @@
 var raphael = require('raphael-browserify');
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 module.exports = function (width, height) {
     return new TileMap(width, height);
 };
 
 function TileMap (width, height) {
+    EventEmitter.call(this);
+    
     this.element = document.createElement('div');
     this.paper = raphael(this.element, width, height);
     this.size = [ width, height ];
@@ -14,9 +18,19 @@ function TileMap (width, height) {
     this.items = {};
     this.itemSet = this.paper.set();
     this.images = {};
+    this.tied = [];
     
     this.moveTo(0, 0);
+    
+    var self = this;
+    process.nextTick(function () {
+        if (self.tied.length === 0) {
+            self.tie(window);
+        }
+    });
 }
+
+util.inherits(TileMap, EventEmitter);
 
 TileMap.prototype.resize = function (width, height) {
     this.size = [ width, height ];
@@ -57,17 +71,14 @@ TileMap.prototype.createItem = function (src, x, y, cb) {
         item.data('y', y);
         
         for (var i = 0; i < self.itemSet.length; i++) {
-            if (y < self.itemSet[i].data('y')) {
+            if (y <= self.itemSet[i].data('y')) {
                 self.itemSet.splice(i, 0, item);
                 break;
             }
         }
         if (i === self.itemSet.length) self.itemSet.push(item);
         
-        self.itemSet.forEach(function (it) {
-            it.toFront();
-        });
-        
+        self.itemSet.toFront();
         self.items[x + ',' + y] = item;
         
         if (typeof cb === 'function') cb(item);
@@ -80,6 +91,7 @@ TileMap.prototype.removeItem = function (x, y) {
     if (item) {
         delete this.items[x + ',' + y];
         item.remove();
+        this.itemSet.toFront();
     }
 };
 
@@ -141,4 +153,64 @@ function polygon (points) {
 
 TileMap.prototype.appendTo = function (target) {
     target.appendChild(this.element);
+};
+
+TileMap.prototype.tie = function (win) {
+    var self = this;
+    self.tied.push(win);
+    
+    var on = typeof win.addEventListener === 'function'
+        ? win.addEventListener
+        : win.on
+    ;
+    on.call(win, 'keydown', function (ev) {
+        var key = ev.keyIdentifier.toLowerCase();
+        var dz = {
+            187 : 1 / 0.9,
+            189 : 0.9,
+        }[ev.keyCode];
+        if (dz) return self.zoom(self.zoomLevel * dz);
+        if (ev.keyCode === 49) return self.zoom(1);
+        
+        var dxy = {
+            down : [ 0, -1 ],
+            up : [ 0, +1 ],
+            left : [ -1, 0 ],
+            right : [ +1, 0 ]
+        }[key];
+        
+        if (dxy) {
+            ev.preventDefault();
+            self.pan(dxy[0], dxy[1]);
+        }
+    });
+    
+    var selected = null;
+    on.call(win, 'mousemove', function (ev) {
+        var xy = self.fromWorld(
+            (ev.clientX - self.size[0] / 2) / self.zoomLevel,
+            (ev.clientY - self.size[1] / 2) / self.zoomLevel
+        );
+        var x = Math.round(xy[0] + self.position[0]);
+        var y = Math.round(xy[1] + self.position[1]);
+        
+        var tile = self.tileAt(x, y);
+        if (tile === selected) return;
+        
+        if (selected) {
+            self.emit('mouseout', selected);
+        }
+        
+        if (tile) {
+            selected = tile;
+            self.emit('mouseover', tile, x, y);
+        }
+    });
+    
+    on.call(win, 'mousedown', function (ev) {
+        if (!selected) return;
+        var x = selected.data('x');
+        var y = selected.data('y');
+        self.emit('mousedown', selected, x, y);
+    });
 };
