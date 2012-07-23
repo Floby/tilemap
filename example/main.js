@@ -73,8 +73,8 @@ window.addEventListener('mousemove', function (ev) {
         (ev.clientX - grid.size[0] / 2) / grid.zoomLevel,
         (ev.clientY - grid.size[1] / 2) / grid.zoomLevel
     );
-    var x = Math.round(xy[0]) + grid.position[0];
-    var y = Math.round(xy[1]) + grid.position[1];
+    var x = Math.round(xy[0] + grid.position[0]);
+    var y = Math.round(xy[1] + grid.position[1]);
     
     for (var i = 0; i < tileSet.length; i++) {
         var px = tileSet[i].data('x');
