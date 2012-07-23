@@ -28,12 +28,7 @@ TileMap.prototype.createTile = function (x, y) {
         [ x + 0.5, y + 0.5 ]
     ].map(function (pt) { return self.toWorld(pt[0], pt[1]) });
     
-    var tile = this.paper.path(polygon(points));
-    tile.attr('stroke-width', '1');
-    tile.attr('fill', 'rgba(0,0,127,0.5)');
-    tile.attr('stroke', 'rgba(0,0,64,0.5)');
-    
-    return tile;
+    return this.paper.path(polygon(points));
 }
 
 TileMap.prototype.move = function (x, y) {
