@@ -70,7 +70,13 @@ TileMap.prototype.toWorld = function (x, y) {
     var tx = x / 2 + y / 2;
     var ty = -x / 2 + y / 2;
     return [ tx * 100, ty * 50 ];
-}
+};
+
+TileMap.prototype.fromWorld = function (tx, ty) {
+    var x = tx / 100;
+    var y = ty / 50;
+    return [ x - y, x + y ];
+};
 
 function polygon (points) {
     var xs = points.map(function (p) { return p.join(',') });

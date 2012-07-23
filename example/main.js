@@ -7,57 +7,38 @@ var images = [ 'rack_0.png' ].reduce(function (acc, file) {
     return acc;
 }, {});
 
-var items = [];
+var itemSet = grid.paper.set();
 function insertItem (item, pt) {
-    var rec = { item : item, pt : pt };
-    for (var i = 0; i < items.length; i++) {
-        if (pt[1] < items[i].pt[1]) {
-            items.splice(i, 0, rec);
+    item.data('pt', pt);
+    
+    for (var i = 0; i < itemSet.length; i++) {
+        if (pt[1] < itemSet[i].data('pt')[1]) {
+            itemSet.splice(i, 0, item);
             break;
         }
     }
-    if (i === items.length) items.push(rec);
+    if (i === itemSet.length) itemSet.push(item);
     
-    items.forEach(function (it) {
-        it.item.toFront();
-    });
-    
-    tiles.forEach(function (t) {
-        t.tile.toFront();
-    });
+    itemSet.toFront();
 }
 
-var tiles = [];
-function insertTile (tile, pt) {
-    var rec = { tile : tile, pt : pt };
-    for (var i = 0; i < tiles.length; i++) {
-        if (pt[1] < tiles[i].pt[1]) {
-            tiles.splice(i, 0, rec);
-            break;
-        }
-    }
-    if (i === tiles.length) tiles.push(rec);
-    
-    tiles.forEach(function (t) {
-        t.tile.toFront();
-    });
-}
+var tileSet = grid.paper.set();
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
         (function (x, y) {
-            var under = grid.createTile(x, y);
-            under.attr('fill', 'rgb(210,210,210)');
-            under.attr('stroke-width', '1');
-            under.attr('stroke', 'rgb(255,255,200)');
+            var tile = grid.createTile(x, y);
+            tile.data('x', x);
+            tile.data('y', y);
+            tile.data('pt', grid.toWorld(x, y));
             
-            var pt = grid.toWorld(x, y);
+            tileSet.push(tile);
+            tile.attr('fill', 'rgba(210,210,210,1.0)');
+            tile.attr('stroke-width', '1');
+            tile.attr('stroke', 'rgb(255,255,200)');
             
-            var over = grid.createTile(x, y);
-            over.attr('stroke', 'transparent');
-            insertTile(over, pt);
             
-            over.click(function () {
+            tile.click(function () {
                 var im = images['rack_0.png'];
                 var item = grid.paper.image(
                     im.src,
@@ -65,13 +46,6 @@ for (var x = -10; x < 10; x++) {
                     im.width, im.height
                 );
                 insertItem(item, pt);
-            });
-            
-            over.mouseover(function () {
-                over.attr('fill', 'rgba(255,127,127,0.8)');
-            });
-            over.mouseout(function () {
-                over.attr('fill', 'transparent');
             });
         })(x, y);
     }
@@ -101,4 +75,30 @@ window.addEventListener('keydown', function (ev) {
 
 window.addEventListener('resize', function (ev) {
     grid.resize(window.outerWidth, window.outerHeight);
+});
+
+var selected = null;
+window.addEventListener('mousemove', function (ev) {
+    var xy = grid.fromWorld(
+        ev.clientX - grid.size[0] / 2,
+        ev.clientY - grid.size[1] / 2
+    );
+    var x = Math.round(xy[0]);
+    var y = Math.round(xy[1]);
+    
+    for (var i = 0; i < tileSet.length; i++) {
+        var px = tileSet[i].data('x');
+        var py = tileSet[i].data('y');
+        if (px === x && py === y) {
+            if (selected) {
+                selected.toBack();
+                selected.attr('fill', 'rgba(210,210,210,1.0)');
+            }
+            
+            selected = tileSet[i];
+            selected.toFront();
+            selected.attr('fill', 'rgba(255,127,127,0.8)');
+            break;
+        }
+    }
 });
