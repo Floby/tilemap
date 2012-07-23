@@ -6,6 +6,21 @@ var images = [ 'rack_0.png' ].reduce(function (acc, file) {
     im.src = file;
     return acc;
 }, {});
+var items = [];
+function insertItem (item, pt) {
+    var rec = { item : item, pt : pt };
+    for (var i = 0; i < items.length; i++) {
+        if (pt[1] < items[i].pt[1]) {
+            items.splice(i, 0, rec);
+            break;
+        }
+    }
+    if (i === items.length) items.push(rec);
+    
+    items.forEach(function (it) {
+        it.item.toFront();
+    });
+}
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
@@ -19,11 +34,12 @@ for (var x = -10; x < 10; x++) {
             
             t.click(function () {
                 var im = images['rack_0.png'];
-                grid.paper.image(
+                var item = grid.paper.image(
                     im.src,
                     pt[0] - im.width / 2, pt[1] - im.height + 25,
                     im.width, im.height
                 );
+                insertItem(item, pt);
             });
             
             t.mouseover(function () {
