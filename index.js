@@ -83,8 +83,9 @@ TileMap.prototype.createItem = function (src, x, y, cb) {
         self.itemSet.toFront();
         self.items[x + ',' + y] = item;
         
-        if (typeof cb === 'function') cb(item);
+        if (typeof cb === 'function') cb(null, item);
     });
+    im.addEventListener('error', cb);
     im.src = src;
 };
 
@@ -209,10 +210,12 @@ TileMap.prototype.tie = function (win) {
         }
     });
     
-    on.call(win, 'mousedown', function (ev) {
-        if (!selected) return;
-        var x = selected.data('x');
-        var y = selected.data('y');
-        self.emit('mousedown', selected, x, y);
+    [ 'click', 'mousedown', 'mouseup' ].forEach(function (evName) {
+        on.call(win, evName, function (ev) {
+            if (!selected) return;
+            var x = selected.data('x');
+            var y = selected.data('y');
+            self.emit(evName, selected, x, y);
+        });
     });
 };

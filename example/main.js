@@ -1,4 +1,5 @@
-var grid = require('../')(window.outerWidth, window.outerHeight);
+var tilemap = require('../');
+var grid = tilemap(window.outerWidth, window.outerHeight);
 grid.appendTo(document.body);
 
 for (var x = -10; x < 10; x++) {
