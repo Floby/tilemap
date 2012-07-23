@@ -76,19 +76,19 @@ window.addEventListener('mousemove', function (ev) {
     var x = Math.round(xy[0] + grid.position[0]);
     var y = Math.round(xy[1] + grid.position[1]);
     
+    if (selected) {
+        selected.toBack();
+        selected.attr('fill', 'rgba(210,210,210,1.0)');
+    }
+    
     for (var i = 0; i < tileSet.length; i++) {
         var px = tileSet[i].data('x');
         var py = tileSet[i].data('y');
         if (px === x && py === y) {
-            if (selected) {
-                selected.toBack();
-                selected.attr('fill', 'rgba(210,210,210,1.0)');
-            }
-            
             selected = tileSet[i];
             selected.toFront();
             selected.attr('fill', 'rgba(255,127,127,0.8)');
-            break;
+            return;
         }
     }
 });
