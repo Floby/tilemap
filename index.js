@@ -11,7 +11,7 @@ function TileMap (width, height) {
     this.zoomLevel = 1;
     
     this.tiles = {};
-    this.items = this.paper.set();
+    this.itemSet = this.paper.set();
     this.images = {};
     
     this.moveTo(0, 0);
@@ -41,7 +41,7 @@ TileMap.prototype.tileAt = function (x, y) {
     return this.tiles[x + ',' + y];
 };
 
-TileMap.prototype.createItem = function (src, x, y) {
+TileMap.prototype.createItem = function (src, x, y, cb) {
     var self = this;
     var im = new Image;
     var w = self.toWorld(x, y);
@@ -55,15 +55,18 @@ TileMap.prototype.createItem = function (src, x, y) {
         item.data('x', x);
         item.data('y', y);
         
-        for (var i = 0; i < self.items.length; i++) {
-            if (y < self.items[i].data('y')) {
-                self.items.splice(i, 0, item);
+        for (var i = 0; i < self.itemSet.length; i++) {
+            if (y < self.itemSet[i].data('y')) {
+                self.itemSet.splice(i, 0, item);
                 break;
             }
         }
-        if (i === self.items.length) self.items.push(item);
+        if (i === self.itemSet.length) self.itemSet.push(item);
         
-        self.items.toFront();
+        self.itemSet.toFront();
+        self.items[x + ',' + y] = item;
+        
+        if (typeof cb === 'function') cb(item);
     });
     im.src = src;
 };
