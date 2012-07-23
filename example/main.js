@@ -74,5 +74,10 @@ window.addEventListener('mousemove', function (ev) {
 
 window.addEventListener('mousedown', function (ev) {
     if (!selected) return;
-    grid.createItem('rack_0.png', selected.data('x'), selected.data('y'));
+    var x = selected.data('x');
+    var y = selected.data('y');
+    if (grid.itemAt(x, y)) {
+        grid.removeItem(x, y);
+    }
+    else grid.createItem('rack_0.png', x, y);
 });

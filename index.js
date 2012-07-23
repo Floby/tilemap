@@ -11,6 +11,7 @@ function TileMap (width, height) {
     this.zoomLevel = 1;
     
     this.tiles = {};
+    this.items = {};
     this.itemSet = this.paper.set();
     this.images = {};
     
@@ -63,12 +64,27 @@ TileMap.prototype.createItem = function (src, x, y, cb) {
         }
         if (i === self.itemSet.length) self.itemSet.push(item);
         
-        self.itemSet.toFront();
+        self.itemSet.forEach(function (it) {
+            it.toFront();
+        });
+        
         self.items[x + ',' + y] = item;
         
         if (typeof cb === 'function') cb(item);
     });
     im.src = src;
+};
+
+TileMap.prototype.removeItem = function (x, y) {
+    var item = this.itemAt(x, y);
+    if (item) {
+        delete this.items[x + ',' + y];
+        item.remove();
+    }
+};
+
+TileMap.prototype.itemAt = function (x, y) {
+    return this.items[x + ',' + y];
 };
 
 TileMap.prototype.move = function (x, y) {
