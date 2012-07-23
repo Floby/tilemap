@@ -1,9 +1,9 @@
-var grid = require('./')(1100, 800);
+var grid = require('./')(window.outerWidth, window.outerHeight);
 grid.appendTo(document.body);
 
 setInterval(function () {
-    var x = Math.floor(Math.random() * 10) - 5;
-    var y = Math.floor(Math.random() * 10) - 5;
+    var x = Math.floor(Math.random() * 40) - 20;
+    var y = Math.floor(Math.random() * 40) - 20;
     var t = grid.createTile(x, y);
     
     setTimeout(function () {
@@ -30,4 +30,8 @@ window.addEventListener('keydown', function (ev) {
         ev.preventDefault();
         grid.pan(dxy[0], dxy[1]);
     }
+});
+
+window.addEventListener('resize', function (ev) {
+    grid.resize(window.outerWidth, window.outerHeight);
 });

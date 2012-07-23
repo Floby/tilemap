@@ -15,6 +15,7 @@ function TileMap (width, height) {
 
 TileMap.prototype.resize = function (width, height) {
     this.size = [ width, height ];
+    this.paper.setSize(width, height);
     this._setView();
 };
 
@@ -73,10 +74,7 @@ TileMap.prototype._setView = function () {
 TileMap.prototype.toWorld = function (x, y) {
     var tx = x / 2 + y / 2;
     var ty = -x / 2 + y / 2;
-    
-    var ox = tx + this.size[0] / 100 / 2;
-    var oy = ty + this.size[1] / 50 / 2;
-    return [ ox * 100, oy * 50 ];
+    return [ tx * 100, ty * 50 ];
 }
 
 function polygon (points) {
