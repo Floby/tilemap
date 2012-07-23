@@ -29,5 +29,8 @@ grid.on('mousedown', function (tile, x, y) {
     if (grid.itemAt(x, y)) {
         grid.removeItem(x, y);
     }
-    else grid.createItem('rack_0.png', x, y);
+    else grid.createItem(
+        'http://substack.net/projects/datacenter/rack_0.png',
+        x, y
+    );
 });
