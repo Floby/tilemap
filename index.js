@@ -8,7 +8,8 @@ function TileMap (width, height) {
     this.element = document.createElement('div');
     this.paper = raphael(this.element, width, height);
     this.size = [ width, height ];
-    this.center = [ 0, 0 ];
+    this.position = [ 0, 0 ];
+    this.tiles = this.paper.set();
 }
 
 TileMap.prototype.resize = function (width, height) {
@@ -23,22 +24,34 @@ TileMap.prototype.createTile = function (x, y) {
         [ x - 0.5, y - 0.5 ],
         [ x + 0.5, y - 0.5 ],
         [ x + 0.5, y + 0.5 ]
-    ].map(function (pt) { return self.toWorld(pt) });
+    ].map(function (pt) { return self.toWorld(pt[0], pt[1]) });
     
     var tile = this.paper.path(polygon(points));
+    tile.transform('t' + self.position[0] + ',' + self.position[1]);
     tile.attr('stroke-width', '1');
     tile.attr('fill', 'rgba(0,0,127,0.5)');
     tile.attr('stroke', 'rgba(0,0,64,0.5)');
+    self.tiles.push(tile);
+    
     return tile;
 }
 
-TileMap.prototype.toWorld = function (pt) {
-    var x = pt[0] / 2 + pt[1] / 2;
-    var y = -pt[0] / 2 + pt[1] / 2;
+TileMap.prototype.move = function (x, y) {
+    this.moveTo(this.position[0] + x, this.position[1] + y);
+};
+
+TileMap.prototype.moveTo = function (x, y) {
+    this.position = [ x, y ];
+    this.tiles.transform('t' + x + ',' + y);
+};
+
+TileMap.prototype.toWorld = function (x, y) {
+    var tx = x / 2 + y / 2;
+    var ty = -x / 2 + y / 2;
     
-    var tx = x + (this.size[0] / 100 / 2) + this.center[0];
-    var ty = y + (this.size[1] / 50 / 2) + this.center[1];
-    return [ tx * 100, ty * 50 ];
+    var ox = tx + this.size[0] / 100 / 2;
+    var oy = ty + this.size[1] / 50 / 2;
+    return [ ox * 100, oy * 50 ];
 }
 
 function polygon (points) {
