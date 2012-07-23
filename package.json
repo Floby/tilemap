@@ -1,0 +1,36 @@
+{
+    "name" : "tilemap",
+    "version" : "0.0.0",
+    "description" : "render isometric tile maps in the browser",
+    "main" : "index.js",
+    "bin" : {},
+    "directories" : {
+        "example" : "example"
+    },
+    "dependencies" : {
+        "raphael-browserify" : "*"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "git://github.com/substack/tilemap.git"
+    },
+    "homepage" : "https://github.com/substack/tilemap",
+    "keywords" : [
+        "isometric",
+        "axonometric",
+        "simcity2000",
+        "sc2k",
+        "tile",
+        "engine",
+        "browserify",
+        "map",
+        "game"
+    ],
+    "author" : {
+        "name" : "James Halliday",
+        "email" : "mail@substack.net",
+        "url" : "http://substack.net"
+    },
+    "license" : "MIT",
+    "engine" : { "node" : ">=0.6" }
+}
