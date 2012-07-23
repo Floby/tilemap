@@ -32,21 +32,11 @@ for (var x = -10; x < 10; x++) {
             tile.data('y', y);
             tile.data('pt', grid.toWorld(x, y));
             
-            tileSet.push(tile);
             tile.attr('fill', 'rgba(210,210,210,1.0)');
             tile.attr('stroke-width', '1');
             tile.attr('stroke', 'rgb(255,255,200)');
             
-            
-            tile.click(function () {
-                var im = images['rack_0.png'];
-                var item = grid.paper.image(
-                    im.src,
-                    pt[0] - im.width / 2, pt[1] - im.height + 25,
-                    im.width, im.height
-                );
-                insertItem(item, pt);
-            });
+            tileSet.push(tile);
         })(x, y);
     }
 }
@@ -80,11 +70,11 @@ window.addEventListener('resize', function (ev) {
 var selected = null;
 window.addEventListener('mousemove', function (ev) {
     var xy = grid.fromWorld(
-        ev.clientX - grid.size[0] / 2,
-        ev.clientY - grid.size[1] / 2
+        (ev.clientX - grid.size[0] / 2) / grid.zoomLevel,
+        (ev.clientY - grid.size[1] / 2) / grid.zoomLevel
     );
-    var x = Math.round(xy[0]);
-    var y = Math.round(xy[1]);
+    var x = Math.round(xy[0]) + grid.position[0];
+    var y = Math.round(xy[1]) + grid.position[1];
     
     for (var i = 0; i < tileSet.length; i++) {
         var px = tileSet[i].data('x');
@@ -101,4 +91,17 @@ window.addEventListener('mousemove', function (ev) {
             break;
         }
     }
+});
+
+window.addEventListener('mousedown', function (ev) {
+    if (!selected) return;
+    var pt = selected.data('pt');
+    
+    var im = images['rack_0.png'];
+    var item = grid.paper.image(
+        im.src,
+        pt[0] - im.width / 2, pt[1] - im.height + 25,
+        im.width, im.height
+    );
+    insertItem(item, pt);
 });
