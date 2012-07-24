@@ -15,12 +15,17 @@ function TileMap (width, height) {
     this.zoomLevel = 1;
     
     this.tiles = {};
+    
     this.items = {};
     this.itemSet = this.paper.set();
     this.images = {};
+    
+    this.points = {};
+    
     this.tied = [];
     
     this.moveTo(0, 0);
+    this.mode = 'tile';
     
     var self = this;
     process.nextTick(function () {
@@ -31,6 +36,11 @@ function TileMap (width, height) {
 }
 
 util.inherits(TileMap, EventEmitter);
+
+TileMap.prototype.setMode = function (mode) {
+    this.mode = mode;
+    this.emit('mode', mode);
+};
 
 TileMap.prototype.resize = function (width, height) {
     this.size = [ width, height ];
@@ -45,13 +55,27 @@ TileMap.prototype.createTile = function (x, y) {
         [ x - 0.5, y - 0.5 ],
         [ x + 0.5, y - 0.5 ],
         [ x + 0.5, y + 0.5 ]
-    ].map(function (pt) { return self.toWorld(pt[0], pt[1]) });
+    ];
+    var poly = points.map(function (pt) { return self.toWorld(pt[0], pt[1]) });
     
-    var tile = this.paper.path(polygon(points));
+    var tile = self.paper.path(polygon(poly));
     tile.data('x', x);
     tile.data('y', y);
     tile.data('pt', self.toWorld(x, y));
-    this.tiles[x + ',' + y] = tile;
+    self.tiles[x + ',' + y] = tile;
+    
+    points.forEach(function (pt) {
+        var key = pt[0] + ',' + pt[1];
+        var xy = self.toWorld(pt[0], pt[1]);
+        var x = xy[0], y = xy[1];
+        if (!self.points[key]) {
+            var point = self.paper.circle(x - 5, y - 5, 10);
+            point.attr('fill', 'transparent');
+            point.attr('stroke', 'transparent');
+            self.points[key] = point;
+        }
+    });
+    
     return tile;
 };
 
@@ -177,6 +201,18 @@ TileMap.prototype.tie = function (win) {
         : win.on
     ;
     on.call(win, 'keydown', function (ev) {
+        var e = Object.keys(ev).reduce(function (acc, key) {
+            acc[key] = ev[key];
+            return acc;
+        }, {});
+        var prevented = false;
+        e.preventDefault = function () {
+            prevented = true;
+            ev.preventDefault();
+        };
+        self.emit('keydown', e);
+        if (prevented) return;
+        
         var key = ev.keyIdentifier.toLowerCase();
         var dz = {
             187 : 1 / 0.9,
@@ -204,29 +240,39 @@ TileMap.prototype.tie = function (win) {
             (ev.clientX - self.size[0] / 2) / self.zoomLevel,
             (ev.clientY - self.size[1] / 2) / self.zoomLevel
         );
-        var x = Math.round(xy[0] + self.position[0]);
-        var y = Math.round(xy[1] + self.position[1]);
-        
-        var tile = self.tileAt(x, y);
-        if (tile === selected) return;
-        
-        if (selected) {
-            self.emit('mouseout', selected);
-            selected = null;
+        if (self.mode === 'tile') {
+            var x = Math.round(xy[0] + self.position[0]);
+            var y = Math.round(xy[1] + self.position[1]);
+            
+            var tile = self.tileAt(x, y);
+            if (tile === selected) return;
+            
+            if (selected) {
+                self.emit('mouseout', selected);
+                selected = null;
+            }
+            
+            if (tile) {
+                selected = tile;
+                self.emit('mouseover', tile, x, y);
+            }
         }
-        
-        if (tile) {
-            selected = tile;
-            self.emit('mouseover', tile, x, y);
+    });
+    
+    self.on('mode', function (mode) {
+        if (mode !== 'tile' && selected) {
+            self.emit('mouseout', selected);
         }
     });
     
     [ 'click', 'mousedown', 'mouseup' ].forEach(function (evName) {
         on.call(win, evName, function (ev) {
-            if (!selected) return;
-            var x = selected.data('x');
-            var y = selected.data('y');
-            self.emit(evName, selected, x, y);
+            if (self.mode === 'tile') {
+                if (!selected) return;
+                var x = selected.data('x');
+                var y = selected.data('y');
+                self.emit(evName, selected, x, y);
+            }
         });
     });
 };

@@ -15,6 +15,15 @@ window.addEventListener('resize', function (ev) {
     grid.resize(window.outerWidth, window.outerHeight);
 });
 
+grid.on('keydown', function (ev) {
+    if (String.fromCharCode(ev.keyCode) === 'W') {
+        grid.setMode({
+            tile : 'wall',
+            wall : 'tile'
+        }[grid.mode] || 'tile');
+    }
+});
+
 grid.on('mouseover', function (tile, x, y) {
     tile.toFront();
     tile.attr('fill', 'rgba(255,127,127,0.8)');
