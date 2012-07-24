@@ -4,10 +4,12 @@ grid.appendTo(document.body);
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
-        var tile = grid.createTile(x, y);
-        tile.attr('fill', 'rgba(210,210,210,1.0)');
-        tile.attr('stroke-width', '1');
-        tile.attr('stroke', 'rgb(255,255,200)');
+        (function (x, y) {
+            var tile = grid.createTile(x, y);
+            tile.element.attr('fill', 'rgba(210,210,210,1.0)');
+            tile.element.attr('stroke-width', '1');
+            tile.element.attr('stroke', 'rgb(255,255,200)');
+        })(x, y);
     }
 }
 
@@ -24,45 +26,45 @@ grid.on('keydown', function (ev) {
     }
 });
 
-grid.on('mouseover', function (t, x, y) {
-    t.toFront();
+grid.on('mouseover', function (t) {
+    t.element.toFront();
     if (t.type === 'tile') {
-        t.attr('fill', 'rgba(255,127,127,0.8)');
+        t.element.attr('fill', 'rgba(255,127,127,0.8)');
     }
-    else if (t.type === 'point' && !t.data('active')) {
-        t.attr('fill', 'rgba(255,0,0,1)');
+    else if (t.type === 'point' && !t.active) {
+        t.element.attr('fill', 'rgba(255,0,0,1)');
     }
 });
 
 grid.on('mouseout', function (t) {
     if (t.type === 'tile') {
-        t.toBack();
-        t.attr('fill', 'rgba(210,210,210,1.0)');
+        t.element.toBack();
+        t.element.attr('fill', 'rgba(210,210,210,1.0)');
     }
-    else if (t.type === 'point' && !t.data('active')) {
-        t.toBack();
-        t.attr('fill', 'transparent');
+    else if (t.type === 'point' && !t.active) {
+        t.element.toBack();
+        t.element.attr('fill', 'transparent');
     }
 });
 
-grid.on('mousedown', function (t, x, y) {
+grid.on('mousedown', function (t) {
     if (t.type === 'tile') {
-        if (grid.itemAt(x, y)) {
-            grid.removeItem(x, y);
+        if (grid.itemAt(t.x, t.y)) {
+            grid.removeItem(t.x, t.y);
         }
         else {
             var u = 'http://substack.net/projects/datacenter/rack_0.png';
-            grid.createItem(u, x, y);
+            grid.createItem(u, t.x, t.y);
         }
     }
     else if (t.type === 'point') {
-        if (t.data('active')) {
-            t.attr('fill', 'transparent');
-            t.data('active', false);
+        if (t.active) {
+            t.element.attr('fill', 'transparent');
+            t.active = false;
         }
         else {
-            t.attr('fill', 'rgb(0,255,255,1)');
-            t.data('active', true);
+            t.element.attr('fill', 'rgb(0,255,255,1)');
+            t.active = true;
         }
     }
 });

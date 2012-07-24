@@ -17,6 +17,7 @@ function TileMap (width, height) {
     this.tiles = {};
     
     this.items = {};
+    this.itemStack = [];
     this.itemSet = this.paper.set();
     this.images = {};
     
@@ -58,11 +59,15 @@ TileMap.prototype.createTile = function (x, y) {
     ];
     var poly = points.map(function (pt) { return self.toWorld(pt[0], pt[1]) });
     
-    var tile = self.paper.path(polygon(poly));
-    tile.data('x', x);
-    tile.data('y', y);
-    tile.data('pt', self.toWorld(x, y));
-    tile.data('type', 'tile');
+    var tile = new EventEmitter;
+    tile.x = x;
+    tile.y = y;
+    var pt = self.toWorld(x, y);
+    tile.screenX = pt[0];
+    tile.screenY = pt[1];
+    tile.type = 'tile';
+    tile.element = self.paper.path(polygon(poly));
+    
     self.tiles[x + ',' + y] = tile;
     
     points.forEach(function (pt) {
@@ -70,10 +75,11 @@ TileMap.prototype.createTile = function (x, y) {
         var xy = self.toWorld(pt[0], pt[1]);
         var x = xy[0], y = xy[1];
         if (!self.points[key]) {
-            var point = self.paper.circle(x - 5, y - 5, 10);
-            point.data('type', 'point');
-            point.attr('fill', 'transparent');
-            point.attr('stroke', 'transparent');
+            var point = new EventEmitter;
+            point.type = 'point';
+            point.element = self.paper.circle(x - 5, y - 5, 10);
+            point.element.attr('fill', 'transparent');
+            point.element.attr('stroke', 'transparent');
             self.points[key] = point;
         }
     });
@@ -95,24 +101,30 @@ TileMap.prototype.createItem = function (src, x, y, cb) {
     var w = self.toWorld(x, y);
     
     im.addEventListener('load', function () {
-        var item = self.paper.image(
+        var item = new EventEmitter;
+        item.element = self.paper.image(
             src,
             w[0] - im.width / 2, w[1] - im.height + 25,
             im.width, im.height
         );
-        item.data('x', x);
-        item.data('y', y);
+        item.x = x;
+        item.y = y;
         
         var pt = self.toWorld(x, y);
-        item.data('pt', pt);
+        item.screenX = pt[0];
+        item.screenY = pt[1];
         
-        for (var i = 0; i < self.itemSet.length; i++) {
-            if (pt[1] <= self.itemSet[i].data('pt')[1]) {
-                self.itemSet.splice(i, 0, item);
+        for (var i = 0; i < self.itemStack.length; i++) {
+            if (pt[1] <= self.itemStack[i].screenY) {
+                self.itemStack.splice(i, 0, item);
+                self.itemSet.splice(i, 0, item.element);
                 break;
             }
         }
-        if (i === self.itemSet.length) self.itemSet.push(item);
+        if (i === self.itemStack.length) {
+            self.itemStack.push(item);
+            self.itemSet.push(item.element);
+        }
         
         self.itemSet.toFront();
         self.items[x + ',' + y] = item;
@@ -127,9 +139,10 @@ TileMap.prototype.removeItem = function (x, y) {
     var item = this.itemAt(x, y);
     if (item) {
         delete this.items[x + ',' + y];
-        item.remove();
-        for (var i = 0; i < this.itemSet.length; i++) {
-            if (item === this.itemSet[i]) {
+        item.element.remove();
+        for (var i = 0; i < this.itemStack.length; i++) {
+            if (item === this.itemStack[i]) {
+                this.itemStack.splice(i, 1);
                 this.itemSet.splice(i, 1);
                 break;
             }
@@ -261,7 +274,6 @@ TileMap.prototype.tie = function (win) {
             
             if (!elem) return;
             if (elem === selected) return;
-            elem.type = elem.data('type');
             
             if (selected) {
                 self.emit('mouseout', selected);
@@ -275,7 +287,7 @@ TileMap.prototype.tie = function (win) {
         });
         
         self.on('mode', function (mode) {
-            if (selected && selected.data('type') !== mode) {
+            if (selected && selected.type !== mode) {
                 self.emit('mouseout', selected);
             }
         });
@@ -283,10 +295,7 @@ TileMap.prototype.tie = function (win) {
         [ 'click', 'mousedown', 'mouseup' ].forEach(function (evName) {
             on.call(win, evName, function (ev) {
                 if (!selected) return;
-                
-                var x = selected.data('x');
-                var y = selected.data('y');
-                self.emit(evName, selected, x, y);
+                self.emit(evName, selected);
             });
         });
     })();
