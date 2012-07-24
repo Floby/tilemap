@@ -212,6 +212,7 @@ TileMap.prototype.tie = function (win) {
         
         if (selected) {
             self.emit('mouseout', selected);
+            selected = null;
         }
         
         if (tile) {
