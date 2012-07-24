@@ -50,6 +50,7 @@ TileMap.prototype.createTile = function (x, y) {
     var tile = this.paper.path(polygon(points));
     tile.data('x', x);
     tile.data('y', y);
+    tile.data('pt', self.toWorld(x, y));
     this.tiles[x + ',' + y] = tile;
     return tile;
 };
@@ -72,8 +73,11 @@ TileMap.prototype.createItem = function (src, x, y, cb) {
         item.data('x', x);
         item.data('y', y);
         
+        var pt = self.toWorld(x, y);
+        item.data('pt', pt);
+        
         for (var i = 0; i < self.itemSet.length; i++) {
-            if (y <= self.itemSet[i].data('y')) {
+            if (pt[1] <= self.itemSet[i].data('pt')[1]) {
                 self.itemSet.splice(i, 0, item);
                 break;
             }
@@ -94,6 +98,12 @@ TileMap.prototype.removeItem = function (x, y) {
     if (item) {
         delete this.items[x + ',' + y];
         item.remove();
+        for (var i = 0; i < this.itemSet.length; i++) {
+            if (item === this.itemSet[i]) {
+                this.itemSet.splice(i, 1);
+                break;
+            }
+        }
         this.itemSet.toFront();
     }
 };

@@ -1,6 +1,6 @@
 {
     "name" : "tilemap",
-    "version" : "0.0.0",
+    "version" : "0.0.1",
     "description" : "render isometric tile maps in the browser",
     "main" : "index.js",
     "bin" : {},
