@@ -62,6 +62,7 @@ TileMap.prototype.createTile = function (x, y) {
     tile.data('x', x);
     tile.data('y', y);
     tile.data('pt', self.toWorld(x, y));
+    tile.data('type', 'tile');
     self.tiles[x + ',' + y] = tile;
     
     points.forEach(function (pt) {
@@ -70,6 +71,7 @@ TileMap.prototype.createTile = function (x, y) {
         var x = xy[0], y = xy[1];
         if (!self.points[key]) {
             var point = self.paper.circle(x - 5, y - 5, 10);
+            point.data('type', 'point');
             point.attr('fill', 'transparent');
             point.attr('stroke', 'transparent');
             self.points[key] = point;
@@ -81,6 +83,10 @@ TileMap.prototype.createTile = function (x, y) {
 
 TileMap.prototype.tileAt = function (x, y) {
     return this.tiles[x + ',' + y];
+};
+
+TileMap.prototype.pointAt = function (x, y) {
+    return this.points[x + ',' + y];
 };
 
 TileMap.prototype.createItem = function (src, x, y, cb) {
@@ -234,45 +240,54 @@ TileMap.prototype.tie = function (win) {
         }
     });
     
-    var selected = null;
-    on.call(win, 'mousemove', function (ev) {
-        var xy = self.fromWorld(
-            (ev.clientX - self.size[0] / 2) / self.zoomLevel,
-            (ev.clientY - self.size[1] / 2) / self.zoomLevel
-        );
-        if (self.mode === 'tile') {
-            var x = Math.round(xy[0] + self.position[0]);
-            var y = Math.round(xy[1] + self.position[1]);
+    (function () {
+        var selected = null;
+        on.call(win, 'mousemove', function (ev) {
+            var xy = self.fromWorld(
+                (ev.clientX - self.size[0] / 2) / self.zoomLevel,
+                (ev.clientY - self.size[1] / 2) / self.zoomLevel
+            );
             
-            var tile = self.tileAt(x, y);
-            if (tile === selected) return;
+            if (self.mode === 'tile') {
+                var x = Math.round(xy[0] + self.position[0]);
+                var y = Math.round(xy[1] + self.position[1]);
+                var elem = self.tileAt(x, y);
+            }
+            else if (self.mode === 'point') {
+                var x = Math.floor(xy[0] + self.position[0]) + 0.5;
+                var y = Math.floor(xy[1] + self.position[1]) + 0.5;
+                var elem = self.pointAt(x, y);
+            }
+            
+            if (!elem) return;
+            if (elem === selected) return;
+            elem.type = elem.data('type');
             
             if (selected) {
                 self.emit('mouseout', selected);
                 selected = null;
             }
             
-            if (tile) {
-                selected = tile;
-                self.emit('mouseover', tile, x, y);
+            if (elem) {
+                selected = elem;
+                self.emit('mouseover', elem, x, y);
             }
-        }
-    });
-    
-    self.on('mode', function (mode) {
-        if (mode !== 'tile' && selected) {
-            self.emit('mouseout', selected);
-        }
-    });
-    
-    [ 'click', 'mousedown', 'mouseup' ].forEach(function (evName) {
-        on.call(win, evName, function (ev) {
-            if (self.mode === 'tile') {
+        });
+        
+        self.on('mode', function (mode) {
+            if (selected && selected.data('type') !== mode) {
+                self.emit('mouseout', selected);
+            }
+        });
+        
+        [ 'click', 'mousedown', 'mouseup' ].forEach(function (evName) {
+            on.call(win, evName, function (ev) {
                 if (!selected) return;
+                
                 var x = selected.data('x');
                 var y = selected.data('y');
                 self.emit(evName, selected, x, y);
-            }
+            });
         });
-    });
+    })();
 };
