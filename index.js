@@ -166,6 +166,23 @@ TileMap.prototype.itemAt = function (x, y) {
     return this.items[x + ',' + y];
 };
 
+TileMap.prototype.createWall = function (src, pt0, pt1, cb) {
+    if (pt0.y === pt1.y) {
+        var x0 = Math.min(pt0.x, pt1.x);
+        var xt = Math.max(pt0.x, pt1.x);
+        for (var x = x0; x < xt; x++) {
+            this.createItem(src, x + 0.75, pt0.y - 0.25);
+        }
+    }
+    else if (pt0.x === pt1.x) {
+        var y0 = Math.min(pt0.y, pt1.y);
+        var yt = Math.max(pt0.y, pt1.y);
+        for (var y = y0; y < yt; y++) {
+            this.createItem(src, pt0.x + 0.25, y + 0.25);
+        }
+    }
+};
+
 TileMap.prototype.move = function (x, y) {
     this.moveTo(this.position[0] + x, this.position[1] + y);
 };

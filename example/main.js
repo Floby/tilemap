@@ -59,31 +59,12 @@ function onCreatePoint (pt) {
             return;
         }
         
-        if (selectedPoint.x !== pt.x && selectedPoint.y !== pt.y) {
-            selectedPoint.element.attr('fill', 'transparent');
-            selectedPoint = null;
-            return;
-        }
-        
         var walls = {
             left : 'http://substack.net/projects/datacenter/wall_left.png',
             right : 'http://substack.net/projects/datacenter/wall_right.png'
         };
-        
-        if (selectedPoint.y === pt.y) {
-            var x0 = Math.min(selectedPoint.x, pt.x);
-            var xt = Math.max(selectedPoint.x, pt.x);
-            for (var x = x0; x < xt; x++) {
-                grid.createItem(walls.right, x + 0.75, pt.y - 0.25);
-            }
-        }
-        else {
-            var y0 = Math.min(selectedPoint.y, pt.y);
-            var yt = Math.max(selectedPoint.y, pt.y);
-            for (var y = y0; y < yt; y++) {
-                grid.createItem(walls.left, pt.x + 0.25, y + 0.25);
-            }
-        }
+        var src = selectedPoint.y === pt.y ? walls.right : walls.left;
+        grid.createWall(src, selectedPoint, pt);
         
         selectedPoint.element.attr('fill', 'transparent');
         pt.element.attr('fill', 'transparent');
