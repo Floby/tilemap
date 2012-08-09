@@ -16,17 +16,13 @@ window.addEventListener('resize', function (ev) {
 var mode = 'tile';
 grid.on('keydown', function (ev) {
     if (String.fromCharCode(ev.keyCode) === 'W') {
-        grid.release(mode);
-        mode = {
-            tile : 'point',
-            point : 'tile'
-        }[mode];
-        
         if (selectedPoint) {
             var s = selectedPoint;
             selectedPoint = null;
             s.emit('mouseout');
         }
+        grid.release(mode);
+        mode = { tile : 'point', point : 'tile' }[mode];
     }
 });
 

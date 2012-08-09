@@ -309,12 +309,12 @@ TileMap.prototype.tie = function (win) {
             var py = Math.floor(xy[1] + self.position[1]) + 0.5;
             var pt = self.pointAt(px, py);
             
-            if (pt && pt !== selected.pt) {
-                if (selected.pt) {
-                    selected.pt.emit('mouseout', ev);
-                    self.emit('mouseout', selected.pt, ev);
+            if (pt && pt !== selected.point) {
+                if (selected.point) {
+                    selected.point.emit('mouseout', ev);
+                    self.emit('mouseout', selected.point, ev);
                 }
-                selected.pt = pt;
+                selected.point = pt;
                 pt.emit('mouseover', ev);
                 self.emit('mouseout', pt, ev);
             }
@@ -326,9 +326,9 @@ TileMap.prototype.tie = function (win) {
                     selected.tile.emit(evName, ev);
                     self.emit(evName, selected.tile, ev);
                 }
-                if (selected.pt) {
-                    selected.pt.emit(evName, ev);
-                    self.emit(evName, selected.pt, ev);
+                if (selected.point) {
+                    selected.point.emit(evName, ev);
+                    self.emit(evName, selected.point, ev);
                 }
             });
         });
