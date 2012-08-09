@@ -4,12 +4,7 @@ grid.appendTo(document.body);
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
-        (function (x, y) {
-            var tile = grid.createTile(x, y);
-            tile.element.attr('fill', 'rgba(210,210,210,1.0)');
-            tile.element.attr('stroke-width', '1');
-            tile.element.attr('stroke', 'rgb(255,255,200)');
-        })(x, y);
+        createTile(x, y);
     }
 }
 
@@ -17,54 +12,80 @@ window.addEventListener('resize', function (ev) {
     grid.resize(window.outerWidth, window.outerHeight);
 });
 
+var mode = 'tile';
 grid.on('keydown', function (ev) {
     if (String.fromCharCode(ev.keyCode) === 'W') {
-        grid.setMode({
+        grid.release(mode);
+        mode = {
             tile : 'point',
             point : 'tile'
-        }[grid.mode] || 'tile');
+        }[mode];
     }
 });
 
-grid.on('mouseover', function (t) {
-    t.element.toFront();
-    if (t.type === 'tile') {
-        t.element.attr('fill', 'rgba(255,127,127,0.8)');
-    }
-    else if (t.type === 'point' && !t.active) {
-        t.element.attr('fill', 'rgba(255,0,0,1)');
-    }
+grid.on('createPoint', function (pt) {
+    pt.on('mouseover', function () {
+        if (mode !== 'point') return;
+        
+        if (!pt.active) {
+            pt.toFront();
+            pt.element.attr('fill', 'rgba(255,0,0,1)');
+        }
+    });
+    
+    pt.on('mouseout', function () {
+        if (mode !== 'point') return;
+        
+        if (!pt.active) {
+            pt.element.attr('fill', 'transparent');
+        }
+    });
+    
+    pt.on('mousedown', function () {
+        if (mode !== 'point') return;
+        
+        if (pt.active) {
+            pt.element.attr('fill', 'transparent');
+            pt.active = false;
+        }
+        else {
+            pt.element.attr('fill', 'rgb(0,255,255,1)');
+            pt.active = true;
+        }
+    });
 });
 
-grid.on('mouseout', function (t) {
-    if (t.type === 'tile') {
-        t.element.toBack();
-        t.element.attr('fill', 'rgba(210,210,210,1.0)');
-    }
-    else if (t.type === 'point' && !t.active) {
-        t.element.toBack();
-        t.element.attr('fill', 'transparent');
-    }
-});
-
-grid.on('mousedown', function (t) {
-    if (t.type === 'tile') {
-        if (grid.itemAt(t.x, t.y)) {
-            grid.removeItem(t.x, t.y);
+function createTile (x, y) {
+    var tile = grid.createTile(x, y);
+    tile.element.attr('fill', 'rgba(210,210,210,1.0)');
+    tile.element.attr('stroke-width', '1');
+    tile.element.attr('stroke', 'rgb(255,255,200)');
+    
+    tile.on('mouseover', function () {
+        if (mode !== 'tile') return;
+        
+        tile.element.toFront();
+        tile.element.attr('fill', 'rgba(255,127,127,0.8)');
+    });
+    
+    tile.on('mouseout', function () {
+        if (mode !== 'tile') return;
+        
+        tile.element.toBack();
+        tile.element.attr('fill', 'rgba(210,210,210,1.0)');
+    });
+    
+    tile.on('mousedown', function () {
+        if (mode !== 'tile') return;
+        
+        if (grid.itemAt(tile.x, tile.y)) {
+            grid.removeItem(tile.x, tile.y);
         }
         else {
             var u = 'http://substack.net/projects/datacenter/rack_0.png';
-            grid.createItem(u, t.x, t.y);
+            grid.createItem(u, tile.x, tile.y);
         }
-    }
-    else if (t.type === 'point') {
-        if (t.active) {
-            t.element.attr('fill', 'transparent');
-            t.active = false;
-        }
-        else {
-            t.element.attr('fill', 'rgb(0,255,255,1)');
-            t.active = true;
-        }
-    }
-});
+    });
+    
+    return tile;
+}
