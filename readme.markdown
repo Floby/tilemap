@@ -113,6 +113,15 @@ item at `(x,y)`.
 
 Remove the item at the grid coordinates `(x,y)`.
 
+## grid.createWall(src, pt0, pt1, cb)
+
+Like `grid.createItem()` except that walls will be inserted between points `pt0`
+and `pt1`. Points should have `'x'` and `'y'` fields.
+
+This function only draws straight walls. Either the `'x'` or the `'y'` must be
+equal between `pt0` and `pt1` for the wall to be created. Otherwise nothing
+happens.
+
 # events
 
 ## grid.on('mouseover', function (tile, x, y) { ... })
