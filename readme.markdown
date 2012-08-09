@@ -94,12 +94,12 @@ Move by the relative screen coordinates `(x,y)`.
 
 Zoom to `level`. The default zoom level is `1`.
 
-## grid.createTile(x, y)
+## var tile = grid.createTile(x, y)
 
 Return a [raphael element](http://raphaeljs.com/reference.html#Element)
 for a new tile at grid coordinates `(x,y)`.
 
-## grid.tileAt(x, y)
+## var tile = grid.tileAt(x, y)
 
 Return the tile at grid coordinates `(x,y)` or `undefined` if there is no such
 tile.
@@ -133,33 +133,35 @@ happens.
 
 # events
 
-## grid.on('mouseover', function (tile, x, y) { ... })
+## grid.on('createPoint', function (point) { ... })
 
-Emitted when the mouse begins to hover over a tile.
+Emitted when a new point is created because a tile was created and more points
+needed to be added.
 
-`x` and `y` are in grid coordinates.
+## tile.on('mouseover', function () { ... })
+## point.on('mouseover', function () { ... })
 
-## grid.on('mouseout', function (tile) { ... })
+Emitted when the mouse begins to hover over a tile or point.
 
-Emitted when the mouse is no longer hovering over a tile.
+## tile.on('mouseout', function () { ... })
+## point.on('mouseout', function () { ... })
 
-## grid.on('mousedown', function (tile, x, y) { ... })
+Emitted when the mouse is no longer hovering over a tile or point.
 
-Emitted when the mouse button goes down over a tile.
+## tile.on('mousedown', function () { ... })
+## point.on('mousedown', function () { ... })
 
-`x` and `y` are in grid coordinates.
+Emitted when the mouse button goes down over a tile or point.
 
-## grid.on('mouseup', function (tile, x, y) { ... })
+## tile.on('mouseup', function () { ... })
+## point.on('mouseup', function () { ... })
 
-Emitted when the mouse button goes up over a tile.
+Emitted when the mouse button goes up over a tile or point.
 
-`x` and `y` are in grid coordinates.
+## tile.on('click', function () { ... })
+## point.on('click', function () { ... })
 
-## grid.on('click', function (tile, x, y) { ... })
-
-Emitted when the mouse clicks on a tile.
-
-`x` and `y` are in grid coordinates.
+Emitted when the mouse clicks on a tile or point.
 
 # install
 
