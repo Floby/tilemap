@@ -1,6 +1,7 @@
 var tilemap = require('../');
 var grid = tilemap(window.outerWidth, window.outerHeight);
 grid.appendTo(document.body);
+grid.on('createPoint', onCreatePoint);
 
 for (var x = -10; x < 10; x++) {
     for (var y = -10; y < 10; y++) {
@@ -23,12 +24,12 @@ grid.on('keydown', function (ev) {
     }
 });
 
-grid.on('createPoint', function (pt) {
+function onCreatePoint (pt) {
     pt.on('mouseover', function () {
         if (mode !== 'point') return;
         
         if (!pt.active) {
-            pt.toFront();
+            pt.element.toFront();
             pt.element.attr('fill', 'rgba(255,0,0,1)');
         }
     });
@@ -53,7 +54,7 @@ grid.on('createPoint', function (pt) {
             pt.active = true;
         }
     });
-});
+}
 
 function createTile (x, y) {
     var tile = grid.createTile(x, y);

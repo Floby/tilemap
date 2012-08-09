@@ -75,8 +75,8 @@ TileMap.prototype.createTile = function (x, y) {
         var point = self.points[key];
         if (!point) {
             point = self.points[key] = new EventEmitter;
-            point.x = x;
-            point.y = y;
+            point.x = pt[0];
+            point.y = pt[1];
             point.type = 'point';
             point.element = self.paper.circle(x - 5, y - 5, 10);
             point.element.attr('fill', 'transparent');
